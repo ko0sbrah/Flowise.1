@@ -5,7 +5,7 @@ $ProgressPreference = 'SilentlyContinue'
 # Paths
 $BaseDir = 'D:\stable-diffusion'
 $RepoDir = Join-Path $BaseDir 'stable-diffusion-webui'
-$VenvDir = Join-Path $BaseDir 'venv'
+$VenvDir = Join-Path $RepoDir 'venv'
 $ModelsDir = Join-Path $RepoDir 'models'
 $TmpDir = Join-Path $BaseDir 'tmp'
 $PipCache = Join-Path $BaseDir 'pip-cache'
@@ -95,13 +95,14 @@ if (-not (Test-Path $ModelsDir)) { New-Item -ItemType Directory -Path $ModelsDir
 Write-Host 'Creating webui-user.bat launcher...'
 @"
 @echo off
+set TORCH_CUDA_ARCH_LIST=6.1
 set "PYTHON=$PythonExe"
 set "GIT=$GitDir\cmd\git.exe"
 set "VENV_DIR=$VenvDir"
 set "PIP_CACHE_DIR=$PipCache"
 set "TEMP=$TmpDir"
 set "TMP=$TmpDir"
-set "COMMANDLINE_ARGS=--xformers --medvram --opt-split-attention --no-half-vae"
+set "COMMANDLINE_ARGS=--medvram --opt-split-attention --no-half-vae"
 set "SD_WEBUI_DIR=$RepoDir"
 call "%RepoDir%\webui.bat"
 "@ | Set-Content -Path $WebuiUserBat -Encoding ASCII
