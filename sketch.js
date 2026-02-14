@@ -5,6 +5,7 @@ let characters = [];
 let currentScene = 1;
 let scrollProgress = 0;
 let particles = [];
+let sceneSpecificElements = [];
 
 // Character positions and properties
 const me = { x: 100, y: 300, size: 40 };
@@ -33,6 +34,9 @@ function setup() {
     // Initialize particles
     initParticles();
 
+    // Initialize scene-specific elements
+    initSceneElements();
+
     // Start animation loop
     animate();
 
@@ -47,11 +51,53 @@ function initParticles() {
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
             size: Math.random() * 5 + 2,
-            speed: Math.random() * 0.5 + 0.2,
+            speed: Math.random() * 0.2 + 0.1, // Slower speed
             alpha: Math.random() * 0.5 + 0.3,
             type: 'heart'
         });
     }
+}
+
+function initSceneElements() {
+    // Scene 1: Hearts
+    sceneSpecificElements['scene1Hearts'] = [];
+    for (let i = 0; i < 30; i++) {
+        sceneSpecificElements['scene1Hearts'].push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 10 + 5,
+            color: getRandomHeartColor(),
+            speed: Math.random() * 0.5 + 0.2,
+            sway: Math.random() * 0.02 + 0.01
+        });
+    }
+
+    // Scene 3: Kiss on the butt
+    sceneSpecificElements['kissMark'] = {
+        x: canvas.width / 2,
+        y: canvas.height * 0.7,
+        size: 30,
+        scale: 1,
+        opacity: 0
+    };
+
+    // Scene 5: Roses
+    sceneSpecificElements['roses'] = [];
+    for (let i = 0; i < 20; i++) {
+        sceneSpecificElements['roses'].push({
+            x: Math.random() * canvas.width,
+            y: canvas.height * 0.8 + Math.random() * 100,
+            size: Math.random() * 15 + 10,
+            stemHeight: Math.random() * 50 + 30,
+            sway: Math.random() * 0.01 + 0.005,
+            bloom: Math.random() > 0.5
+        });
+    }
+}
+
+function getRandomHeartColor() {
+    const colors = ['#e91e63', '#f44336', '#ff5252', '#ff4081', '#e040fb', '#7c4dff'];
+    return colors[Math.floor(Math.random() * colors.length)];
 }
 
 function resizeCanvas() {
@@ -76,7 +122,7 @@ function updateCharacterPositions() {
     // Calculate base position based on scroll with smoother movement
     const baseX = 100 + (scrollProgress * 400);
     // Gentle vertical movement with slower oscillation
-    const baseY = 300 + Math.sin(scrollProgress * 5) * 15;
+    const baseY = 300 + Math.sin(scrollProgress * 3) * 10; // Slower movement
 
     // Update both characters' positions
     me.x = baseX;
@@ -116,11 +162,6 @@ function drawCharacter(x, y, size, color, isRose = false) {
         ctx.textAlign = 'center';
         ctx.fillText('Me', x, y + size + 15);
     }
-    
-    // Subtle bouncing effect for characters
-    const bounceOffset = Math.sin(Date.now() * 0.005) * 3;
-    ctx.translate(x, y + bounceOffset);
-    ctx.translate(-x, -(y + bounceOffset));
 }
 
 function drawBackground() {
@@ -174,7 +215,7 @@ function drawParticles() {
     for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         
-        // Move particles slightly
+        // Move particles slowly
         p.y -= p.speed;
         
         // Reset particles that go off screen
@@ -210,13 +251,51 @@ function drawParticles() {
 
 function drawSceneElements() {
     switch(currentScene) {
+        case 1: // Hearts scene
+            // Draw floating hearts
+            const time = Date.now() * 0.001;
+            sceneSpecificElements['scene1Hearts'].forEach((heart, index) => {
+                // Sway movement
+                const swayOffset = Math.sin(time * 2 + index) * 5;
+                const floatOffset = Math.cos(time * 1.5 + index * 0.5) * 3;
+                
+                heart.x += Math.sin(time * 0.5 + index) * 0.1;
+                if (heart.x > canvas.width) heart.x = 0;
+                if (heart.x < 0) heart.x = canvas.width;
+                
+                ctx.fillStyle = heart.color;
+                ctx.globalAlpha = 0.7;
+                
+                // Draw heart shape
+                ctx.save();
+                ctx.translate(heart.x + swayOffset, heart.y + floatOffset);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(
+                    0, -heart.size/2,
+                    -heart.size/2, -heart.size,
+                    0, -heart.size
+                );
+                ctx.bezierCurveTo(
+                    heart.size/2, -heart.size,
+                    0, -heart.size/2,
+                    0, 0
+                );
+                ctx.fill();
+                ctx.restore();
+            });
+            ctx.globalAlpha = 1.0;
+            break;
+
         case 2: // South American Adventure
-            // Draw mountains
+            // Draw mountains with gentle movement
+            const mountainTime = Date.now() * 0.0005;
             ctx.fillStyle = '#8d6e63';
             ctx.beginPath();
             ctx.moveTo(0, canvas.height * 0.7);
             for (let i = 0; i < canvas.width; i += 100) {
-                ctx.lineTo(i, canvas.height * (0.5 + Math.sin(i * 0.01) * 0.2));
+                const offset = Math.sin(mountainTime + i * 0.01) * 5; // Gentle movement
+                ctx.lineTo(i, canvas.height * (0.5 + Math.sin(i * 0.01) * 0.2) + offset);
             }
             ctx.lineTo(canvas.width, canvas.height);
             ctx.lineTo(0, canvas.height);
@@ -228,18 +307,19 @@ function drawSceneElements() {
             ctx.beginPath();
             ctx.moveTo(0, canvas.height * 0.6);
             for (let i = 0; i < canvas.width; i += 150) {
-                ctx.lineTo(i, canvas.height * (0.4 + Math.sin(i * 0.007) * 0.15));
+                const offset = Math.sin(mountainTime * 0.7 + i * 0.007) * 3; // Gentler movement
+                ctx.lineTo(i, canvas.height * (0.4 + Math.sin(i * 0.007) * 0.15) + offset);
             }
             ctx.lineTo(canvas.width, canvas.height);
             ctx.lineTo(0, canvas.height);
             ctx.closePath();
             ctx.fill();
 
-            // Draw clouds
+            // Draw clouds with gentle movement
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             for (let i = 0; i < 5; i++) {
-                const x = i * 200 + 50;
-                const y = 50 + Math.sin(i) * 20;
+                const x = (i * 200 + 50 + Date.now() * 0.01) % (canvas.width + 200) - 100;
+                const y = 50 + Math.sin(i + Date.now() * 0.001) * 10; // Slower movement
                 
                 // Draw cloud shape
                 ctx.beginPath();
@@ -250,9 +330,11 @@ function drawSceneElements() {
                 ctx.fill();
             }
 
-            // Draw colorful houses with windows
+            // Draw colorful houses with gentle swaying
+            const houseTime = Date.now() * 0.001;
             for (let i = 0; i < 5; i++) {
-                const x = 100 + i * 150;
+                const sway = Math.sin(houseTime + i) * 2; // Gentle swaying motion
+                const x = 100 + i * 150 + sway;
                 const height = 60 + Math.random() * 40;
                 const colors = ['#ef5350', '#ab47bc', '#5c6bc0', '#66bb6a', '#ffca28'];
                 ctx.fillStyle = colors[i % colors.length];
@@ -276,6 +358,28 @@ function drawSceneElements() {
                 ctx.closePath();
                 ctx.fill();
             }
+            break;
+
+        case 3: // Kiss on the butt
+            // Draw a stylized butt
+            ctx.fillStyle = '#ffccbc';
+            ctx.beginPath();
+            ctx.ellipse(canvas.width / 2, canvas.height * 0.7, 40, 25, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw kiss mark
+            const kissTime = Date.now() * 0.005;
+            const kissOpacity = 0.8 + Math.sin(kissTime) * 0.2;
+            ctx.fillStyle = `rgba(255, 0, 0, ${kissOpacity})`;
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height * 0.7, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw kiss lips
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2 - 3, canvas.height * 0.7 - 2, 4, 0, Math.PI * 2);
+            ctx.arc(canvas.width / 2 + 3, canvas.height * 0.7 - 2, 4, 0, Math.PI * 2);
+            ctx.fill();
             break;
 
         case 4: // Passions
@@ -358,14 +462,67 @@ function drawSceneElements() {
             ctx.arc(420, 150, 12, 0, Math.PI * 2);
             ctx.fill();
             break;
+
+        case 5: // Roses
+            // Draw grass
+            ctx.fillStyle = '#8bc34a';
+            ctx.fillRect(0, canvas.height * 0.8, canvas.width, canvas.height * 0.2);
             
+            // Draw roses with gentle swaying
+            const roseTime = Date.now() * 0.002;
+            sceneSpecificElements['roses'].forEach((rose, index) => {
+                const sway = Math.sin(roseTime + index * 0.5) * 5;
+                
+                // Draw stem
+                ctx.strokeStyle = '#4caf50';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(rose.x + sway, canvas.height * 0.8);
+                ctx.lineTo(rose.x + sway, canvas.height * 0.8 - rose.stemHeight);
+                ctx.stroke();
+                
+                // Draw leaves
+                ctx.fillStyle = '#4caf50';
+                ctx.beginPath();
+                ctx.ellipse(rose.x + sway - 5, canvas.height * 0.8 - rose.stemHeight * 0.7, 8, 4, -Math.PI/4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.ellipse(rose.x + sway + 8, canvas.height * 0.8 - rose.stemHeight * 0.5, 8, 4, Math.PI/4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw rose
+                if (rose.bloom) {
+                    // Petals
+                    ctx.fillStyle = '#e91e63';
+                    ctx.beginPath();
+                    ctx.arc(rose.x + sway, canvas.height * 0.8 - rose.stemHeight, rose.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Center
+                    ctx.fillStyle = '#ffeb3b';
+                    ctx.beginPath();
+                    ctx.arc(rose.x + sway, canvas.height * 0.8 - rose.stemHeight, rose.size * 0.6, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Bud
+                    ctx.fillStyle = '#f44336';
+                    ctx.beginPath();
+                    ctx.ellipse(rose.x + sway, canvas.height * 0.8 - rose.stemHeight, rose.size * 0.7, rose.size * 0.9, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+            break;
+
         case 6: // End - Starry night
-            // Draw stars
-            ctx.fillStyle = 'white';
+            // Draw twinkling stars
+            const starTime = Date.now() * 0.002;
             for (let i = 0; i < 100; i++) {
-                const x = Math.random() * canvas.width;
-                const y = Math.random() * canvas.height * 0.5;
+                const x = (i * 37) % canvas.width; // Fixed position
+                const y = (i * 57) % (canvas.height * 0.5); // Fixed position
                 const radius = Math.random() * 1.5;
+                const twinkle = 0.7 + Math.sin(starTime + i * 0.3) * 0.3; // Slow twinkling
+                ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
                 ctx.beginPath();
                 ctx.arc(x, y, radius, 0, Math.PI * 2);
                 ctx.fill();
@@ -429,4 +586,6 @@ window.onload = setup;
 // Handle window resize
 window.addEventListener('resize', () => {
     resizeCanvas();
+    // Reinitialize scene elements with new canvas dimensions
+    initSceneElements();
 });
