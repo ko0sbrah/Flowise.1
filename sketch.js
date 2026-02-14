@@ -124,6 +124,11 @@ function updateCharacterPositions() {
     // Gentle vertical movement with slower oscillation
     const baseY = 300 + Math.sin(scrollProgress * 3) * 10; // Slower movement
 
+    // Adjust positions for smaller screens
+    if (window.innerWidth < 768) {
+        baseX = 80 + (scrollProgress * 300);
+    }
+
     // Update both characters' positions
     me.x = baseX;
     me.y = baseY;
@@ -132,6 +137,11 @@ function updateCharacterPositions() {
 }
 
 function drawCharacter(x, y, size, color, isRose = false) {
+    // Adjust character size for mobile
+    if (window.innerWidth < 768) {
+        size = size * 0.8;
+    }
+
     // Draw body (simple circle)
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -269,6 +279,12 @@ function drawSceneElements() {
                 // Draw heart shape
                 ctx.save();
                 ctx.translate(heart.x + swayOffset, heart.y + floatOffset);
+                
+                // Scale hearts on mobile
+                if (window.innerWidth < 768) {
+                    ctx.scale(0.7, 0.7);
+                }
+                
                 ctx.beginPath();
                 ctx.moveTo(0, 0);
                 ctx.bezierCurveTo(
@@ -334,27 +350,46 @@ function drawSceneElements() {
             const houseTime = Date.now() * 0.001;
             for (let i = 0; i < 5; i++) {
                 const sway = Math.sin(houseTime + i) * 2; // Gentle swaying motion
-                const x = 100 + i * 150 + sway;
+                
+                // Adjust house positions for mobile
+                let x;
+                if (window.innerWidth < 768) {
+                    x = 50 + i * 100 + sway;
+                } else {
+                    x = 100 + i * 150 + sway;
+                }
+                
                 const height = 60 + Math.random() * 40;
                 const colors = ['#ef5350', '#ab47bc', '#5c6bc0', '#66bb6a', '#ffca28'];
                 ctx.fillStyle = colors[i % colors.length];
-                ctx.fillRect(x, canvas.height * 0.7 - height, 40, height);
+                
+                // Adjust house size for mobile
+                let width, roofHeight;
+                if (window.innerWidth < 768) {
+                    width = 30;
+                    roofHeight = 15;
+                } else {
+                    width = 40;
+                    roofHeight = 20;
+                }
+                
+                ctx.fillRect(x, canvas.height * 0.7 - height, width, height);
 
                 // Windows
                 ctx.fillStyle = '#fffde7';
-                ctx.fillRect(x + 5, canvas.height * 0.7 - height + 10, 10, 10);
-                ctx.fillRect(x + 25, canvas.height * 0.7 - height + 25, 10, 10);
+                ctx.fillRect(x + 5, canvas.height * 0.7 - height + 10, 7, 7);
+                ctx.fillRect(x + 18, canvas.height * 0.7 - height + 20, 7, 7);
 
                 // Door
                 ctx.fillStyle = '#5d4037';
-                ctx.fillRect(x + 15, canvas.height * 0.7 - 15, 10, 15);
+                ctx.fillRect(x + 12, canvas.height * 0.7 - 12, 6, 12);
 
                 // Roof
                 ctx.fillStyle = '#795548';
                 ctx.beginPath();
-                ctx.moveTo(x - 5, canvas.height * 0.7 - height);
-                ctx.lineTo(x + 20, canvas.height * 0.7 - height - 20);
-                ctx.lineTo(x + 45, canvas.height * 0.7 - height);
+                ctx.moveTo(x - 3, canvas.height * 0.7 - height);
+                ctx.lineTo(x + width/2, canvas.height * 0.7 - height - roofHeight);
+                ctx.lineTo(x + width + 3, canvas.height * 0.7 - height);
                 ctx.closePath();
                 ctx.fill();
             }
@@ -363,104 +398,204 @@ function drawSceneElements() {
         case 3: // Kiss on the butt
             // Draw a stylized butt
             ctx.fillStyle = '#ffccbc';
-            ctx.beginPath();
-            ctx.ellipse(canvas.width / 2, canvas.height * 0.7, 40, 25, 0, 0, Math.PI * 2);
+            
+            // Adjust size for mobile
+            if (window.innerWidth < 768) {
+                ctx.beginPath();
+                ctx.ellipse(canvas.width / 2, canvas.height * 0.7, 30, 20, 0, 0, Math.PI * 2);
+            } else {
+                ctx.beginPath();
+                ctx.ellipse(canvas.width / 2, canvas.height * 0.7, 40, 25, 0, 0, Math.PI * 2);
+            }
             ctx.fill();
             
             // Draw kiss mark
             const kissTime = Date.now() * 0.005;
             const kissOpacity = 0.8 + Math.sin(kissTime) * 0.2;
             ctx.fillStyle = `rgba(255, 0, 0, ${kissOpacity})`;
-            ctx.beginPath();
-            ctx.arc(canvas.width / 2, canvas.height * 0.7, 10, 0, Math.PI * 2);
+            
+            if (window.innerWidth < 768) {
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height * 0.7, 8, 0, Math.PI * 2);
+            } else {
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height * 0.7, 10, 0, Math.PI * 2);
+            }
             ctx.fill();
             
             // Draw kiss lips
-            ctx.beginPath();
-            ctx.arc(canvas.width / 2 - 3, canvas.height * 0.7 - 2, 4, 0, Math.PI * 2);
-            ctx.arc(canvas.width / 2 + 3, canvas.height * 0.7 - 2, 4, 0, Math.PI * 2);
+            if (window.innerWidth < 768) {
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2 - 2, canvas.height * 0.7 - 1.5, 3, 0, Math.PI * 2);
+                ctx.arc(canvas.width / 2 + 2, canvas.height * 0.7 - 1.5, 3, 0, Math.PI * 2);
+            } else {
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2 - 3, canvas.height * 0.7 - 2, 4, 0, Math.PI * 2);
+                ctx.arc(canvas.width / 2 + 3, canvas.height * 0.7 - 2, 4, 0, Math.PI * 2);
+            }
             ctx.fill();
             break;
 
         case 4: // Passions
             // Draw art elements
             ctx.fillStyle = '#e91e63';
-            ctx.fillRect(50, 50, 10, 40); // Paint brush
-            ctx.beginPath();
-            ctx.arc(55, 50, 8, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Draw palette
-            ctx.fillStyle = '#795548';
-            ctx.beginPath();
-            ctx.arc(70, 40, 15, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Draw paint spots on palette
-            ctx.fillStyle = '#f44336';
-            ctx.beginPath();
-            ctx.arc(65, 35, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#4caf50';
-            ctx.beginPath();
-            ctx.arc(75, 45, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#2196f3';
-            ctx.beginPath();
-            ctx.arc(70, 50, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Draw bird
-            ctx.fillStyle = '#4caf50';
-            ctx.beginPath();
-            ctx.arc(200, 100, 15, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(215, 100);
-            ctx.lineTo(230, 90);
-            ctx.lineTo(230, 110);
-            ctx.closePath();
-            ctx.fill();
-
-            // Draw additional birds
-            ctx.fillStyle = '#8bc34a';
-            ctx.beginPath();
-            ctx.arc(250, 70, 12, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(262, 70);
-            ctx.lineTo(275, 65);
-            ctx.lineTo(275, 75);
-            ctx.closePath();
-            ctx.fill();
-
-            // Draw crochet elements
-            ctx.fillStyle = '#ff9800';
-            for (let i = 0; i < 5; i++) {
+            
+            // Adjust sizes for mobile
+            if (window.innerWidth < 768) {
+                ctx.fillRect(30, 30, 6, 25); // Paint brush
                 ctx.beginPath();
-                ctx.arc(350 + i * 30, 150, 10, 0, Math.PI * 2);
+                ctx.arc(33, 30, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw palette
+                ctx.fillStyle = '#795548';
+                ctx.beginPath();
+                ctx.arc(45, 25, 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw paint spots on palette
+                ctx.fillStyle = '#f44336';
+                ctx.beginPath();
+                ctx.arc(42, 22, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#4caf50';
+                ctx.beginPath();
+                ctx.arc(48, 28, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#2196f3';
+                ctx.beginPath();
+                ctx.arc(45, 32, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw bird
+                ctx.fillStyle = '#4caf50';
+                ctx.beginPath();
+                ctx.arc(130, 70, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(140, 70);
+                ctx.lineTo(150, 65);
+                ctx.lineTo(150, 75);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw additional birds
+                ctx.fillStyle = '#8bc34a';
+                ctx.beginPath();
+                ctx.arc(170, 50, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(178, 50);
+                ctx.lineTo(185, 47);
+                ctx.lineTo(185, 53);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw crochet elements
+                ctx.fillStyle = '#ff9800';
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.arc(220 + i * 20, 100, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Draw crochet hook
+                ctx.strokeStyle = '#795548';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(280, 85);
+                ctx.lineTo(280, 115);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(280, 85, 5, 0, Math.PI);
+                ctx.stroke();
+
+                // Draw yarn ball
+                ctx.fillStyle = '#ffc107';
+                ctx.beginPath();
+                ctx.arc(260, 100, 8, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillRect(50, 50, 10, 40); // Paint brush
+                ctx.beginPath();
+                ctx.arc(55, 50, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw palette
+                ctx.fillStyle = '#795548';
+                ctx.beginPath();
+                ctx.arc(70, 40, 15, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw paint spots on palette
+                ctx.fillStyle = '#f44336';
+                ctx.beginPath();
+                ctx.arc(65, 35, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#4caf50';
+                ctx.beginPath();
+                ctx.arc(75, 45, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#2196f3';
+                ctx.beginPath();
+                ctx.arc(70, 50, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw bird
+                ctx.fillStyle = '#4caf50';
+                ctx.beginPath();
+                ctx.arc(200, 100, 15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(215, 100);
+                ctx.lineTo(230, 90);
+                ctx.lineTo(230, 110);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw additional birds
+                ctx.fillStyle = '#8bc34a';
+                ctx.beginPath();
+                ctx.arc(250, 70, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(262, 70);
+                ctx.lineTo(275, 65);
+                ctx.lineTo(275, 75);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw crochet elements
+                ctx.fillStyle = '#ff9800';
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.arc(350 + i * 30, 150, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Draw crochet hook
+                ctx.strokeStyle = '#795548';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(450, 130);
+                ctx.lineTo(450, 170);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(450, 130, 8, 0, Math.PI);
+                ctx.stroke();
+
+                // Draw yarn ball
+                ctx.fillStyle = '#ffc107';
+                ctx.beginPath();
+                ctx.arc(420, 150, 12, 0, Math.PI * 2);
                 ctx.fill();
             }
-
-            // Draw crochet hook
-            ctx.strokeStyle = '#795548';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(450, 130);
-            ctx.lineTo(450, 170);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(450, 130, 8, 0, Math.PI);
-            ctx.stroke();
-
-            // Draw yarn ball
-            ctx.fillStyle = '#ffc107';
-            ctx.beginPath();
-            ctx.arc(420, 150, 12, 0, Math.PI * 2);
-            ctx.fill();
             break;
 
         case 5: // Roses
@@ -473,22 +608,32 @@ function drawSceneElements() {
             sceneSpecificElements['roses'].forEach((rose, index) => {
                 const sway = Math.sin(roseTime + index * 0.5) * 5;
                 
+                // Adjust rose size for mobile
+                let adjustedSize, adjustedStemHeight;
+                if (window.innerWidth < 768) {
+                    adjustedSize = rose.size * 0.7;
+                    adjustedStemHeight = rose.stemHeight * 0.7;
+                } else {
+                    adjustedSize = rose.size;
+                    adjustedStemHeight = rose.stemHeight;
+                }
+                
                 // Draw stem
                 ctx.strokeStyle = '#4caf50';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(rose.x + sway, canvas.height * 0.8);
-                ctx.lineTo(rose.x + sway, canvas.height * 0.8 - rose.stemHeight);
+                ctx.lineTo(rose.x + sway, canvas.height * 0.8 - adjustedStemHeight);
                 ctx.stroke();
                 
                 // Draw leaves
                 ctx.fillStyle = '#4caf50';
                 ctx.beginPath();
-                ctx.ellipse(rose.x + sway - 5, canvas.height * 0.8 - rose.stemHeight * 0.7, 8, 4, -Math.PI/4, 0, Math.PI * 2);
+                ctx.ellipse(rose.x + sway - 5, canvas.height * 0.8 - adjustedStemHeight * 0.7, 6, 3, -Math.PI/4, 0, Math.PI * 2);
                 ctx.fill();
                 
                 ctx.beginPath();
-                ctx.ellipse(rose.x + sway + 8, canvas.height * 0.8 - rose.stemHeight * 0.5, 8, 4, Math.PI/4, 0, Math.PI * 2);
+                ctx.ellipse(rose.x + sway + 6, canvas.height * 0.8 - adjustedStemHeight * 0.5, 6, 3, Math.PI/4, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // Draw rose
@@ -496,19 +641,19 @@ function drawSceneElements() {
                     // Petals
                     ctx.fillStyle = '#e91e63';
                     ctx.beginPath();
-                    ctx.arc(rose.x + sway, canvas.height * 0.8 - rose.stemHeight, rose.size, 0, Math.PI * 2);
+                    ctx.arc(rose.x + sway, canvas.height * 0.8 - adjustedStemHeight, adjustedSize, 0, Math.PI * 2);
                     ctx.fill();
                     
                     // Center
                     ctx.fillStyle = '#ffeb3b';
                     ctx.beginPath();
-                    ctx.arc(rose.x + sway, canvas.height * 0.8 - rose.stemHeight, rose.size * 0.6, 0, Math.PI * 2);
+                    ctx.arc(rose.x + sway, canvas.height * 0.8 - adjustedStemHeight, adjustedSize * 0.6, 0, Math.PI * 2);
                     ctx.fill();
                 } else {
                     // Bud
                     ctx.fillStyle = '#f44336';
                     ctx.beginPath();
-                    ctx.ellipse(rose.x + sway, canvas.height * 0.8 - rose.stemHeight, rose.size * 0.7, rose.size * 0.9, 0, 0, Math.PI * 2);
+                    ctx.ellipse(rose.x + sway, canvas.height * 0.8 - adjustedStemHeight, adjustedSize * 0.7, adjustedSize * 0.9, 0, 0, Math.PI * 2);
                     ctx.fill();
                 }
             });
@@ -561,9 +706,15 @@ function drawSceneMessage() {
     // Get the current scene message
     const message = sceneMessages[currentScene - 1].text;
 
+    // Adjust text size for mobile
+    let fontSize = 24;
+    if (window.innerWidth < 768) {
+        fontSize = 18;
+    }
+
     // Set text styles
     ctx.fillStyle = 'rgba(93, 64, 55, 0.85)';
-    ctx.font = 'bold 24px Georgia, serif';
+    ctx.font = `bold ${fontSize}px Georgia, serif`;
     ctx.textAlign = 'center';
 
     // Draw text background for better readability
